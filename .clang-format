@@ -1,0 +1,22 @@
+---
+Language: Java
+
+AccessModifierOffset: 0
+AlignAfterOpenBracket: true
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+BreakAfterJavaFieldAnnotations: true
+BreakBeforeBinaryOperators: false
+BreakBeforeBraces: Attach
+ColumnLimit: 80
+IndentCaseLabels: true
+IndentWidth: 2
+MaxEmptyLinesToKeep: 1
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpacesInAngles: false
+SpacesInParentheses: false
+TabWidth: 2
+UseTab: Never
