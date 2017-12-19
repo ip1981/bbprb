@@ -7,7 +7,7 @@ import hudson.model.Cause;
  */
 public class BitbucketCause extends Cause {
   private final String sourceBranch;
-  private final String targetBranch;
+  private final String destinationBranch;
   private final String sourceRepository;
   private final String pullRequestId;
   private final String destinationRepository;
@@ -17,13 +17,13 @@ public class BitbucketCause extends Cause {
   private final String pullRequestAuthor;
   public static final String BITBUCKET_URL = "https://bitbucket.org/";
 
-  public BitbucketCause(String sourceBranch, String targetBranch,
+  public BitbucketCause(String sourceBranch, String destinationBranch,
                         String sourceRepository, String pullRequestId,
                         String destinationRepository, String pullRequestTitle,
                         String sourceCommitHash, String destinationCommitHash,
                         String pullRequestAuthor) {
     this.sourceBranch = sourceBranch;
-    this.targetBranch = targetBranch;
+    this.destinationBranch = destinationBranch;
     this.sourceRepository = sourceRepository;
     this.pullRequestId = pullRequestId;
     this.destinationRepository = destinationRepository;
@@ -36,8 +36,8 @@ public class BitbucketCause extends Cause {
   public String getSourceBranch() {
     return sourceBranch;
   }
-  public String getTargetBranch() {
-    return targetBranch;
+  public String getDestinationBranch() {
+    return destinationBranch;
   }
 
   public String getSourceRepository() {
