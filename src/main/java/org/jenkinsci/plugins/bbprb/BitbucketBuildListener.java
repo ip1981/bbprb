@@ -57,7 +57,7 @@ public class BitbucketBuildListener extends RunListener<AbstractBuild<?, ?>> {
     BitbucketBuildTrigger trigger =
         build.getProject().getTrigger(BitbucketBuildTrigger.class);
 
-    if ((trigger != null) && (trigger instanceof BitbucketBuildTrigger)) {
+    if (trigger != null) {
       return trigger;
     } else {
       return null;
