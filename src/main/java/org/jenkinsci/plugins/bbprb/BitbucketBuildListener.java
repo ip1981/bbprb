@@ -3,13 +3,13 @@ package org.jenkinsci.plugins.bbprb;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Job;
+import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.triggers.Trigger;
-import java.io.IOException;
+import java.lang.Exception;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import hudson.model.Result;
 
 import org.jenkinsci.plugins.bbprb.bitbucket.BuildState;
 
@@ -33,7 +33,7 @@ public class BitbucketBuildListener extends RunListener<AbstractBuild<?, ?>> {
     try {
       build.setDescription(
           build.getCause(BitbucketCause.class).getShortDescription());
-    } catch (IOException e) {
+    } catch (Exception e) {
       LOGGER.log(Level.WARNING, "Could not set build description: {0}",
                  e.getMessage());
     }
