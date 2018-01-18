@@ -23,7 +23,8 @@ public class BitbucketBuildListener extends RunListener<AbstractBuild<?, ?>> {
       return;
     }
 
-    BitbucketBuildTrigger trigger = extractTrigger(build);
+    BitbucketBuildTrigger trigger =
+        build.getProject().getTrigger(BitbucketBuildTrigger.class);
     if (trigger == null) {
       return;
     }
@@ -41,7 +42,8 @@ public class BitbucketBuildListener extends RunListener<AbstractBuild<?, ?>> {
 
   @Override
   public void onCompleted(AbstractBuild<?, ?> build, TaskListener listener) {
-    BitbucketBuildTrigger trigger = extractTrigger(build);
+    BitbucketBuildTrigger trigger =
+        build.getProject().getTrigger(BitbucketBuildTrigger.class);
     if (trigger != null) {
       LOGGER.log(Level.FINE, "Completed after BitbucketBuildTrigger");
       Result result = build.getResult();
@@ -49,18 +51,6 @@ public class BitbucketBuildListener extends RunListener<AbstractBuild<?, ?>> {
                                                     : BuildState.FAILED;
       BitbucketCause cause = build.getCause(BitbucketCause.class);
       trigger.setPRState(cause, state, build.getUrl());
-    }
-  }
-
-  private static BitbucketBuildTrigger
-  extractTrigger(AbstractBuild<?, ?> build) {
-    BitbucketBuildTrigger trigger =
-        build.getProject().getTrigger(BitbucketBuildTrigger.class);
-
-    if (trigger != null) {
-      return trigger;
-    } else {
-      return null;
     }
   }
 
