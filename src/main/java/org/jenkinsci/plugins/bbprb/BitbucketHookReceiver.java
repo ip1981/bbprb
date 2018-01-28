@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.bbprb;
 import hudson.Extension;
 import hudson.model.UnprotectedRootAction;
 import hudson.security.ACL;
+import hudson.security.csrf.CrumbExclusion;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import java.io.IOException;
@@ -12,6 +13,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 import net.sf.json.JSONException;
@@ -23,10 +28,23 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 @Extension
-public class BitbucketHookReceiver implements UnprotectedRootAction {
+public class BitbucketHookReceiver
+    extends CrumbExclusion implements UnprotectedRootAction {
 
   private static final String BITBUCKET_HOOK_URL = "bbprb-hook";
   private static final String BITBUCKET_UA = "Bitbucket-Webhooks/2.0";
+
+  @Override
+  public boolean process(HttpServletRequest req, HttpServletResponse resp,
+                         FilterChain chain)
+      throws IOException, ServletException {
+    String pathInfo = req.getPathInfo();
+    if (pathInfo != null && pathInfo.startsWith("/" + BITBUCKET_HOOK_URL)) {
+      chain.doFilter(req, resp);
+      return true;
+    }
+    return false;
+  }
 
   public void doIndex(StaplerRequest req, StaplerResponse resp)
       throws IOException {
