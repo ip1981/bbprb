@@ -47,8 +47,14 @@ public class BitbucketBuildListener extends RunListener<AbstractBuild<?, ?>> {
     if (trigger != null) {
       LOGGER.log(Level.FINE, "Completed after BitbucketBuildTrigger");
       Result result = build.getResult();
-      BuildState state = (result == Result.SUCCESS) ? BuildState.SUCCESSFUL
-                                                    : BuildState.FAILED;
+      BuildState state;
+      if (Result.SUCCESS == result) {
+        state = BuildState.SUCCESSFUL;
+      } else if (Result.ABORTED == result) {
+        state = BuildState.STOPPED;
+      } else {
+        state = BuildState.FAILED;
+      }
       BitbucketCause cause = build.getCause(BitbucketCause.class);
       trigger.setPRState(cause, state, build.getUrl());
     }
