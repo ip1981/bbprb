@@ -17,6 +17,9 @@
     <url>https://github.com/ip1981/bbprb.git</url>
     <tag>HEAD</tag>
   </scm>
+  <properties>
+    <findbugs.failOnError>false</findbugs.failOnError>
+  </properties>
   <developers>
     <developer>
       <id>ip1981</id>
