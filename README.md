@@ -43,7 +43,7 @@ Trigger's options in the job's XML configuration file:
 
 ```xml
   <triggers>
-    <org.jenkinsci.plugins.bbprb.BitbucketBuildTrigger plugin="bbprb@0.1.0">
+    <org.jenkinsci.plugins.bbprb.BitbucketBuildTrigger plugin="bbprb@0.2.0">
       <ciKey>jenkins</ciKey>
       <ciName>Jenkins</ciName>
       <credentialsId>bitbucket-pwd</credentialsId>
