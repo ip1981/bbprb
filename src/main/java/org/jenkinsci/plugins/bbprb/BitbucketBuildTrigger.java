@@ -54,7 +54,6 @@ public class BitbucketBuildTrigger extends Trigger<AbstractProject<?, ?>> {
   private final String credentialsId;
   private final String destinationRepository;
   private final boolean cancelOutdatedJobs;
-  private final boolean checkDestinationCommit;
 
   // XXX: This is for Jelly.
   // https://wiki.jenkins.io/display/JENKINS/Basic+guide+to+Jelly+usage+in+Jenkins
@@ -73,9 +72,6 @@ public class BitbucketBuildTrigger extends Trigger<AbstractProject<?, ?>> {
   public boolean getCancelOutdatedJobs() {
     return this.cancelOutdatedJobs;
   }
-  public boolean getCheckDestinationCommit() {
-    return this.checkDestinationCommit;
-  }
 
   private transient ApiClient apiClient;
 
@@ -85,13 +81,11 @@ public class BitbucketBuildTrigger extends Trigger<AbstractProject<?, ?>> {
   @DataBoundConstructor
   public BitbucketBuildTrigger(String credentialsId,
                                String destinationRepository, String ciKey,
-                               String ciName, boolean checkDestinationCommit,
-                               boolean cancelOutdatedJobs)
+                               String ciName, boolean cancelOutdatedJobs)
       throws ANTLRException {
     super();
     this.apiClient = null;
     this.cancelOutdatedJobs = cancelOutdatedJobs;
-    this.checkDestinationCommit = checkDestinationCommit;
     this.ciKey = ciKey;
     this.ciName = ciName;
     this.credentialsId = credentialsId;
