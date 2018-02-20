@@ -109,9 +109,9 @@ public class BitbucketBuildTrigger extends Trigger<AbstractProject<?, ?>> {
           all, CredentialsMatchers.withId(this.credentialsId));
       if (creds != null) {
         logger.log(Level.INFO, "Creating Bitbucket API client");
-        this.apiClient = new ApiClient(
-            creds.getUsername(), creds.getPassword().getPlainText(),
-            this.destinationRepository, this.ciKey, this.ciName);
+        this.apiClient = new ApiClient(creds.getUsername(),
+                                       creds.getPassword().getPlainText(),
+                                       this.ciKey, this.ciName);
       } else {
         logger.log(Level.SEVERE, "Credentials `{0}` not found",
                    this.credentialsId);
@@ -126,9 +126,9 @@ public class BitbucketBuildTrigger extends Trigger<AbstractProject<?, ?>> {
       logger.log(Level.INFO, "Setting status of PR #{0} to {1} for {2}",
                  new Object[] {cause.getPullRequestId(), state,
                                cause.getDestinationRepository()});
-      this.apiClient.setBuildStatus(cause.getSourceCommitHash(), state,
-                                    getInstance().getRootUrl() + path, null,
-                                    this.job.getFullName());
+      this.apiClient.setBuildStatus(
+          cause.getSourceRepository(), cause.getSourceCommitHash(), state,
+          getInstance().getRootUrl() + path, null, this.job.getFullName());
     } else {
       logger.log(Level.INFO,
                  "Will not set Bitbucket PR build status (not configured)");

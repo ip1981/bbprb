@@ -37,7 +37,6 @@ public class ApiClient {
   private static final String V2_API_BASE_URL =
       "https://bitbucket.org/api/2.0/repositories/";
   private static final String COMPUTED_KEY_FORMAT = "%s-%s";
-  private String repository;
   private Credentials credentials;
   private String key;
   private String name;
@@ -89,12 +88,9 @@ public class ApiClient {
     }
   }
 
-  public <T extends HttpClientFactory> ApiClient(String username,
-                                                 String password,
-                                                 String repository, String key,
-                                                 String name) {
+  public <T extends HttpClientFactory>
+  ApiClient(String username, String password, String key, String name) {
     this.credentials = new UsernamePasswordCredentials(username, password);
-    this.repository = repository;
     this.key = key;
     this.name = name;
     this.factory = HttpClientFactory.INSTANCE;
@@ -136,9 +132,10 @@ public class ApiClient {
     return this.computeAPIKey(bsKey);
   }
 
-  public void setBuildStatus(String revision, BuildState state, String buildUrl,
-                             String comment, String keyEx) {
-    String url = v2("/commit/" + revision + "/statuses/build");
+  public void setBuildStatus(String repository, String revision,
+                             BuildState state, String buildUrl, String comment,
+                             String keyEx) {
+    String url = v2(repository + "/commit/" + revision + "/statuses/build");
     String computedKey = this.computeAPIKey(keyEx);
     NameValuePair[] data = new NameValuePair[] {
         new NameValuePair("description", comment),
@@ -157,7 +154,7 @@ public class ApiClient {
   }
 
   private String v2(String path) {
-    return V2_API_BASE_URL + this.repository + path;
+    return V2_API_BASE_URL + path;
   }
 
   private String post(String path, NameValuePair[] data) {
