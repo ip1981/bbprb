@@ -34,8 +34,6 @@ import org.apache.commons.httpclient.util.EncodingUtil;
 public class ApiClient {
   private static final Logger logger =
       Logger.getLogger(ApiClient.class.getName());
-  private static final String V1_API_BASE_URL =
-      "https://bitbucket.org/api/1.0/repositories/";
   private static final String V2_API_BASE_URL =
       "https://bitbucket.org/api/2.0/repositories/";
   private static final String COMPUTED_KEY_FORMAT = "%s-%s";
@@ -138,13 +136,6 @@ public class ApiClient {
     return this.computeAPIKey(bsKey);
   }
 
-  public boolean hasBuildStatus(String revision, String keyEx) {
-    String url = v2("/commit/" + revision + "/statuses/build/" +
-                    this.computeAPIKey(keyEx));
-    String reqBody = get(url);
-    return reqBody != null && reqBody.contains("\"state\"");
-  }
-
   public void setBuildStatus(String revision, BuildState state, String buildUrl,
                              String comment, String keyEx) {
     String url = v2("/commit/" + revision + "/statuses/build");
@@ -161,36 +152,12 @@ public class ApiClient {
                new Object[] {state, url, computedKey, post(url, data)});
   }
 
-  public void deletePullRequestApproval(String pullRequestId) {
-    delete(v2("/pullrequests/" + pullRequestId + "/approve"));
-  }
-
-  public void deletePullRequestComment(String pullRequestId, String commentId) {
-    delete(v1("/pullrequests/" + pullRequestId + "/comments/" + commentId));
-  }
-
-  public void updatePullRequestComment(String pullRequestId, String content,
-                                       String commentId) {
-    NameValuePair[] data = new NameValuePair[] {
-        new NameValuePair("content", content),
-    };
-    put(v1("/pullrequests/" + pullRequestId + "/comments/" + commentId), data);
-  }
-
   private HttpClient getHttpClient() {
     return this.factory.getInstanceHttpClient();
   }
 
-  private String v1(String path) {
-    return V1_API_BASE_URL + this.repository + path;
-  }
-
   private String v2(String path) {
     return V2_API_BASE_URL + this.repository + path;
-  }
-
-  private String get(String path) {
-    return send(new GetMethod(path));
   }
 
   private String post(String path, NameValuePair[] data) {
@@ -198,17 +165,6 @@ public class ApiClient {
     req.setRequestBody(data);
     req.getParams().setContentCharset("utf-8");
     return send(req);
-  }
-
-  private void delete(String path) {
-    send(new DeleteMethod(path));
-  }
-
-  private void put(String path, NameValuePair[] data) {
-    PutMethod req = new PutMethod(path);
-    req.setRequestBody(EncodingUtil.formUrlEncode(data, "utf-8"));
-    req.getParams().setContentCharset("utf-8");
-    send(req);
   }
 
   private String send(HttpMethodBase req) {
@@ -231,16 +187,5 @@ public class ApiClient {
       req.releaseConnection();
     }
     return null;
-  }
-
-  private <R> R parse(String response, Class<R> cls) throws IOException {
-    return new ObjectMapper().readValue(response, cls);
-  }
-  private <R> R parse(String response, JavaType type) throws IOException {
-    return new ObjectMapper().readValue(response, type);
-  }
-  private <R> R parse(String response, TypeReference<R> ref)
-      throws IOException {
-    return new ObjectMapper().readValue(response, ref);
   }
 }
