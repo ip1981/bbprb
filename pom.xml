@@ -8,7 +8,7 @@
   </parent>
   <artifactId>bbprb</artifactId>
   <name>Bitbucket Pullrequest Builder Plugin</name>
-  <version>0.2.0</version>
+  <version>0.3.0</version>
   <description>This Jenkins plugin builds pull requests from Bitbucket.org and will report the test results.</description>
   <packaging>hpi</packaging>
   <url></url>

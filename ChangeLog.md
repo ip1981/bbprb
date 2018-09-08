@@ -1,3 +1,13 @@
+0.3.0 (! BREAKING !)
+===================
+
+  * Made it work with the [Rebuild Plugin](https://wiki.jenkins.io/display/JENKINS/Rebuild+Plugin).
+  * Job configurations have to be changed. Updated documentation.
+  * Require Jenkins 2.60+.
+  * Cancel outdated jobs by default.
+  * Removed dead code from the Bitbucket API client.
+
+
 0.2.0
 =====
 
