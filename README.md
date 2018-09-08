@@ -3,7 +3,7 @@ BBPRB
 
 This plugin is a revision of original [Bitbucket Pull Request Builder Plugin](https://wiki.jenkins.io/display/JENKINS/Bitbucket+pullrequest+builder+plugin).
 It was started by adding support for [Bitbucket webhooks](https://confluence.atlassian.com/bitbucket/manage-webhooks-735643732.html)
-and resulted in massive rewrite and deleting the code.
+and resulted in massive rewrite and deleting the code. Jenkins 2.60+ is required.
 
 
 Configuration
@@ -16,13 +16,7 @@ This plugin needs credentials to access Bitbucket API. The credentials comprise
 the user's name and a password. This password is known as "App password" and
 it is not the same as the user's password.
 
-Only Git repositories are supported.  No special configration is required
-for the [Git plugin](https://plugins.jenkins.io/git), but the repository URL
-should point to the same repository specified for this plugins.  In fact,
-they may not match. After receiving a web-hook this plugin uses its options
-to find a job to be triggered, sets some relevant options (like commit hash)
-and starts the build. If repositories are not the same, you will just get a
-failure because the hash is not found, etc.
+Only Git repositories are supported.
 
 These environment variables are set when the job is triggered by this plugin:
 
@@ -37,6 +31,19 @@ bbprbSourceBranch
 bbprbSourceCommitHash
 bbprbSourceRepository
 ```
+
+Recommended Git configuration:
+
+* Repository URL: `git@bitbucket.org:${bbprbDestinationRepository}.git`
+* Branch Specifier: `${bbprbSourceCommitHash}`
+* [Optional] Branch to merge to: `${bbprbDestinationBranch}`
+
+![Recommended git configuration](./screenshots/bbprb-git-config.png)
+
+
+Trigger's options in Jenkins graphical user interface:
+
+![Jenkins trigger configuration](./screenshots/bbprb-config.png)
 
 
 Trigger's options in the job's XML configuration file:
@@ -54,10 +61,6 @@ Trigger's options in the job's XML configuration file:
   </triggers>
 
 ```
-
-Trigger's options in Jenkins graphical user interface:
-
-![Jenkins trigger configuration](./screenshots/bbprb-config.png)
 
 
 Configuring Bitbucket web-hook

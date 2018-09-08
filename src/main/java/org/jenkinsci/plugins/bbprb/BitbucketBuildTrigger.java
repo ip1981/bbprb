@@ -20,7 +20,7 @@ import hudson.model.queue.QueueTaskFuture;
 import hudson.model.Queue;
 import hudson.model.Result;
 import hudson.model.Run;
-import hudson.plugins.git.RevisionParameterAction;
+import hudson.model.StringParameterValue;
 import hudson.security.ACL;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
@@ -35,7 +35,6 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import jenkins.model.Jenkins;
-import jenkins.model.ParameterizedJobMixIn;
 import net.sf.json.JSONObject;
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
@@ -74,6 +73,21 @@ public class BitbucketBuildTrigger extends Trigger<AbstractProject<?, ?>> {
   }
 
   private transient ApiClient apiClient;
+
+  private static final transient ArrayList<String> bbprbSafeParameters =
+      new ArrayList<String>() {
+        {
+          add("bbprbDestinationBranch");
+          add("bbprbDestinationCommitHash");
+          add("bbprbDestinationRepository");
+          add("bbprbPullRequestAuthor");
+          add("bbprbPullRequestId");
+          add("bbprbPullRequestTitle");
+          add("bbprbSourceBranch");
+          add("bbprbSourceCommitHash");
+          add("bbprbSourceRepository");
+        }
+      };
 
   public static final BitbucketBuildTriggerDescriptor descriptor =
       new BitbucketBuildTriggerDescriptor();
@@ -143,11 +157,31 @@ public class BitbucketBuildTrigger extends Trigger<AbstractProject<?, ?>> {
       SecurityContextHolder.setContext(orig);
     }
 
+    List<ParameterValue> bbprb = new ArrayList<>();
+
+    bbprb.add(new StringParameterValue("bbprbDestinationBranch",
+                                       cause.getDestinationBranch()));
+    bbprb.add(new StringParameterValue("bbprbDestinationCommitHash",
+                                       cause.getDestinationCommitHash()));
+    bbprb.add(new StringParameterValue("bbprbDestinationRepository",
+                                       cause.getDestinationRepository()));
+    bbprb.add(new StringParameterValue("bbprbPullRequestAuthor",
+                                       cause.getPullRequestAuthor()));
+    bbprb.add(new StringParameterValue("bbprbPullRequestId",
+                                       cause.getPullRequestId()));
+    bbprb.add(new StringParameterValue("bbprbPullRequestTitle",
+                                       cause.getPullRequestTitle()));
+    bbprb.add(
+        new StringParameterValue("bbprbSourceBranch", cause.getSourceBranch()));
+    bbprb.add(new StringParameterValue("bbprbSourceCommitHash",
+                                       cause.getSourceCommitHash()));
+    bbprb.add(new StringParameterValue("bbprbSourceRepository",
+                                       cause.getSourceRepository()));
+
     setPRState(cause, BuildState.INPROGRESS, this.job.getUrl());
 
-    this.job.scheduleBuild2(
-        0, cause, new ParametersAction(this.getDefaultParameters()),
-        new RevisionParameterAction(cause.getSourceCommitHash()));
+    this.job.scheduleBuild2(0, cause,
+                            new ParametersAction(bbprb, bbprbSafeParameters));
   }
 
   private void
@@ -220,20 +254,6 @@ public class BitbucketBuildTrigger extends Trigger<AbstractProject<?, ?>> {
       }
     }
     return false;
-  }
-
-  private ArrayList<ParameterValue> getDefaultParameters() {
-    Map<String, ParameterValue> values = new HashMap<String, ParameterValue>();
-    ParametersDefinitionProperty definitionProperty =
-        this.job.getProperty(ParametersDefinitionProperty.class);
-
-    if (definitionProperty != null) {
-      for (ParameterDefinition definition :
-           definitionProperty.getParameterDefinitions()) {
-        values.put(definition.getName(), definition.getDefaultParameterValue());
-      }
-    }
-    return new ArrayList<ParameterValue>(values.values());
   }
 
   public void handlePR(JSONObject pr) {

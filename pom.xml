@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>2.11</version>
+    <version>3.0</version>
   </parent>
   <artifactId>bbprb</artifactId>
   <name>Bitbucket Pullrequest Builder Plugin</name>
@@ -52,18 +52,8 @@
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
-      <artifactId>git</artifactId>
-      <version>2.2.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jenkins-ci</groupId>
-      <artifactId>symbol-annotation</artifactId>
-      <version>1.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>14.0-rc3</version>
+      <artifactId>credentials</artifactId>
+      <version>2.1.16</version>
     </dependency>
   </dependencies>
   <pluginRepositories>
