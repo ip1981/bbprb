@@ -215,8 +215,13 @@ public class BitbucketBuildTrigger extends Trigger<AbstractProject<?, ?>> {
         Run build = (Run)o;
         if (build.isBuilding() &&
             hasCauseFromTheSamePullRequest(build.getCauses(), bitbucketCause)) {
-          logger.fine("Aborting build: " + build + " since PR is outdated");
-          setBuildDescription(build);
+          logger.fine("Aborting '" + build + "' since the PR is outdated");
+          try {
+            build.setDescription("Aborted build since the PR is outdated");
+          } catch (IOException e) {
+            logger.warning("Could not set build description: " +
+                           e.getMessage());
+          }
           final Executor executor = build.getExecutor();
           if (executor == null) {
             throw new IllegalStateException("Executor can't be NULL");
@@ -224,16 +229,6 @@ public class BitbucketBuildTrigger extends Trigger<AbstractProject<?, ?>> {
           executor.interrupt(Result.ABORTED);
         }
       }
-    }
-  }
-
-  private void setBuildDescription(final Run build) {
-    try {
-      build.setDescription(
-          "Aborting build by `Bitbucket Pullrequest Builder Plugin`: " + build +
-          " since PR is outdated");
-    } catch (IOException e) {
-      logger.warning("Could not set build description: " + e.getMessage());
     }
   }
 
