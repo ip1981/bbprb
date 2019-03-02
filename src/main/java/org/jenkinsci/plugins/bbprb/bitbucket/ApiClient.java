@@ -170,11 +170,14 @@ public class ApiClient {
     client.getParams().setAuthenticationPreemptive(true);
     try {
       int statusCode = client.executeMethod(req);
-      if (statusCode != HttpStatus.SC_OK) {
-        logger.log(Level.WARNING, "Response status: " + req.getStatusLine() +
-                                      " URI: " + req.getURI());
-      } else {
-        return req.getResponseBodyAsString();
+      switch (statusCode) {
+        case HttpStatus.SC_OK:
+          return req.getResponseBodyAsString();
+        case HttpStatus.SC_CREATED:
+          break;
+        default:
+          logger.log(Level.WARNING, "Response status: " + req.getStatusLine() +
+                                        " URI: " + req.getURI());
       }
     } catch (HttpException e) {
       logger.log(Level.WARNING, "Failed to send request.", e);
