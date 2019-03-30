@@ -150,12 +150,6 @@ public class BitbucketBuildTrigger extends Trigger<AbstractProject<?, ?>> {
   }
 
   private void startJob(BitbucketCause cause) {
-    if (this.cancelOutdatedJobs) {
-      SecurityContext orig = ACL.impersonate(ACL.SYSTEM);
-      cancelPreviousJobsInQueueThatMatch(cause);
-      abortRunningJobsThatMatch(cause);
-      SecurityContextHolder.setContext(orig);
-    }
 
     List<ParameterValue> bbprb = new ArrayList<>();
 
@@ -184,52 +178,12 @@ public class BitbucketBuildTrigger extends Trigger<AbstractProject<?, ?>> {
                             new ParametersAction(bbprb, bbprbSafeParameters));
   }
 
-  private void
-  cancelPreviousJobsInQueueThatMatch(@Nonnull BitbucketCause cause) {
-    logger.log(Level.FINE, "Looking for queued jobs that match PR #{0}",
-               cause.getPullRequestId());
-    Queue queue = getInstance().getQueue();
-
-    for (Queue.Item item : queue.getItems()) {
-      if (hasCauseFromTheSamePullRequest(item.getCauses(), cause)) {
-        logger.fine("Canceling item in queue: " + item);
-        queue.cancel(item);
-      }
-    }
-  }
-
   private Jenkins getInstance() {
     final Jenkins instance = Jenkins.getInstance();
     if (instance == null) {
       throw new IllegalStateException("Jenkins instance is NULL!");
     }
     return instance;
-  }
-
-  private void
-  abortRunningJobsThatMatch(@Nonnull BitbucketCause bitbucketCause) {
-    logger.log(Level.FINE, "Looking for running jobs that match PR #{0}",
-               bitbucketCause.getPullRequestId());
-    for (Object o : job.getBuilds()) {
-      if (o instanceof Run) {
-        Run build = (Run)o;
-        if (build.isBuilding() &&
-            hasCauseFromTheSamePullRequest(build.getCauses(), bitbucketCause)) {
-          logger.fine("Aborting '" + build + "' since the PR is outdated");
-          try {
-            build.setDescription("Aborted build since the PR is outdated");
-          } catch (IOException e) {
-            logger.warning("Could not set build description: " +
-                           e.getMessage());
-          }
-          final Executor executor = build.getExecutor();
-          if (executor == null) {
-            throw new IllegalStateException("Executor can't be NULL");
-          }
-          executor.interrupt(Result.ABORTED);
-        }
-      }
-    }
   }
 
   private boolean
@@ -251,11 +205,57 @@ public class BitbucketBuildTrigger extends Trigger<AbstractProject<?, ?>> {
     return false;
   }
 
-  public void handlePR(JSONObject pr) {
+  private void cancelPR(BitbucketCause cause) {
+    SecurityContext orig = ACL.impersonate(ACL.SYSTEM);
+
+    logger.log(Level.FINE, "Looking for queued jobs that match PR #{0}",
+               cause.getPullRequestId());
+    Queue queue = getInstance().getQueue();
+    for (Queue.Item item : queue.getItems()) {
+      if (hasCauseFromTheSamePullRequest(item.getCauses(), cause)) {
+        logger.fine("Canceling item in queue: " + item);
+        queue.cancel(item);
+      }
+    }
+
+    logger.log(Level.FINE, "Looking for running jobs that match PR #{0}",
+               cause.getPullRequestId());
+    for (Object o : job.getBuilds()) {
+      if (o instanceof Run) {
+        Run build = (Run)o;
+        if (build.isBuilding() &&
+            hasCauseFromTheSamePullRequest(build.getCauses(), cause)) {
+          logger.fine("Aborting '" + build + "' since the PR is outdated");
+          try {
+            build.setDescription("Aborted build since the PR is outdated");
+          } catch (IOException e) {
+            logger.warning("Could not set build description: " +
+                           e.getMessage());
+          }
+          final Executor executor = build.getExecutor();
+          if (executor == null) {
+            throw new IllegalStateException("Executor can't be NULL");
+          }
+          executor.interrupt(Result.ABORTED);
+        }
+      }
+    }
+    SecurityContextHolder.setContext(orig);
+  }
+
+  public void handlePR(String event, JSONObject pr) {
+
     JSONObject src = pr.getJSONObject("source");
     JSONObject dst = pr.getJSONObject("destination");
     String dstRepository =
         dst.getJSONObject("repository").getString("full_name");
+    if (!dstRepository.equals(this.destinationRepository)) {
+      logger.log(Level.FINE,
+                 "Job `{0}`: repository `{1}` does not match `{2}`. Skipping.",
+                 new Object[] {this.job.getFullName(), dstRepository,
+                               this.destinationRepository});
+      return;
+    }
     BitbucketCause cause = new BitbucketCause(
         src.getJSONObject("branch").getString("name"),
         dst.getJSONObject("branch").getString("name"),
@@ -265,14 +265,20 @@ public class BitbucketBuildTrigger extends Trigger<AbstractProject<?, ?>> {
         src.getJSONObject("commit").getString("hash"),
         dst.getJSONObject("commit").getString("hash"),
         pr.getJSONObject("author").getString("username"));
-    if (!dstRepository.equals(this.destinationRepository)) {
-      logger.log(Level.FINE,
-                 "Job `{0}`: repository `{1}` does not match `{2}`. Skipping.",
-                 new Object[] {this.job.getFullName(), dstRepository,
-                               this.destinationRepository});
-      return;
+    switch (event) {
+      case "pullrequest:created":
+        startJob(cause);
+        break;
+      case "pullrequest:updated":
+        if (this.cancelOutdatedJobs) {
+          cancelPR(cause);
+        }
+        startJob(cause);
+        break;
+      default:
+        logger.log(Level.WARNING, "Unhandled event: `{0}`",
+                   new Object[] {event});
     }
-    startJob(cause);
   }
 
   @Extension

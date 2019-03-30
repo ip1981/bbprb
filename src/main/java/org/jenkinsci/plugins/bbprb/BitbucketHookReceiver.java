@@ -97,15 +97,8 @@ public class BitbucketHookReceiver
       JSONObject payload = JSONObject.fromObject(body);
       if (event.startsWith("pullrequest:")) {
         JSONObject pr = payload.getJSONObject("pullrequest");
-        String state = pr.getString("state");
-        if (!"OPEN".equals(state)) {
-          LOGGER.log(
-              Level.INFO, "Ignoring closed PR ({0}): #{1} {2}",
-              new Object[] {state, pr.getInt("id"), pr.getString("title")});
-          return;
-        }
         for (BitbucketBuildTrigger trigger : getBitbucketTriggers()) {
-          trigger.handlePR(pr);
+          trigger.handlePR(event, pr);
         }
         return;
       }
