@@ -264,7 +264,7 @@ public class BitbucketBuildTrigger extends Trigger<AbstractProject<?, ?>> {
         dstRepository, pr.getString("title"),
         src.getJSONObject("commit").getString("hash"),
         dst.getJSONObject("commit").getString("hash"),
-        pr.getJSONObject("author").getString("username"));
+        pr.getJSONObject("author").getString("display_name"));
     switch (event) {
       case "pullrequest:created":
         startJob(cause);
