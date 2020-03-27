@@ -32,7 +32,6 @@ public class BitbucketHookReceiver
     extends CrumbExclusion implements UnprotectedRootAction {
 
   private static final String BITBUCKET_HOOK_URL = "bbprb-hook";
-  private static final String BITBUCKET_UA = "Bitbucket-Webhooks/2.0";
 
   @Override
   public boolean process(HttpServletRequest req, HttpServletResponse resp,
@@ -48,14 +47,6 @@ public class BitbucketHookReceiver
 
   public void doIndex(StaplerRequest req, StaplerResponse resp)
       throws IOException {
-
-    String userAgent = req.getHeader("user-agent");
-    if (!BITBUCKET_UA.equals(userAgent)) {
-      LOGGER.log(Level.WARNING, "Bad user agent: `{0}`, expected `{1}`",
-                 new Object[] {userAgent, BITBUCKET_UA});
-      resp.setStatus(StaplerResponse.SC_BAD_REQUEST);
-      return;
-    }
 
     String uri = req.getRequestURI();
     if (!uri.contains("/" + BITBUCKET_HOOK_URL + "/")) {
